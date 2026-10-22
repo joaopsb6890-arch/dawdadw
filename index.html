@@ -41,38 +41,13 @@
             boas-vindas, verificação, anúncios, lembretes, contadores e rankings.
           </p>
           <div class="acoes">
-            <a class="botao principal" href="#cartao-ligacao">🔌 Ligar ao bot</a>
             <a class="botao fantasma" href="#cartao-anuncio">📢 Fazer um anúncio</a>
           </div>
+          <p class="hint" id="hint-ligacao"></p>
         </div>
         <img class="heroi-img" src="./miku2.svg" alt="Miku a cantar" onerror="this.style.display='none'" />
       </section>
 
-      <!-- ═══ LIGAÇÃO ═══ -->
-      <section class="cartao" id="cartao-ligacao">
-        <h2>🔌 Ligação ao bot</h2>
-        <p class="dica">
-          <b>Automático:</b> quando abres o painel servido pelo próprio bot
-          (<code>python -m bot.main</code>), a ligação é feita sozinha a partir das
-          informações do Discord Developer Portal — não precisas de escrever nada aqui.
-          Este cartão só aparece se abrires o painel fora do bot (ex.: Vercel).
-        </p>
-        <div class="grelha-2">
-          <label>
-            URL da API
-            <input type="text" id="input-url" placeholder="http://localhost:8787 (ou o domínio do bot)" />
-          </label>
-          <label>
-            Token do painel
-            <input type="password" id="input-token" placeholder="token do painel do bot" autocomplete="off" />
-          </label>
-        </div>
-        <div class="acoes">
-          <button class="botao principal" id="btn-ligar">Ligar</button>
-          <button class="botao fantasma" id="btn-desligar">Desligar</button>
-          <span class="hint" id="hint-ligacao">Ainda não ligado.</span>
-        </div>
-      </section>
 
       <!-- ═══ ESTADO ═══ -->
       <section class="cartao" id="cartao-estado" hidden>
@@ -292,12 +267,10 @@
         <div class="login-texto">
           <h2>Entrar com Discord 🔗</h2>
           <p class="dica">
-            Mostra quem és no painel e personaliza a experiência.
-            O controlo do bot continua protegido pelo token da API.
+            Entra com a tua conta para gerir os servidores onde a Miku está.
           </p>
           <div class="acoes">
             <button class="botao principal" id="btn-login-discord">🔗 Entrar com Discord</button>
-            <button class="botao fantasma" id="btn-continuar">Continuar sem entrar</button>
           </div>
           <p class="hint" id="hint-login">
             Precisas de registar esta página em
@@ -309,8 +282,6 @@
 
     <!-- 🔥 Firebase Analytics (módulo ES — não bloqueia o painel) -->
     <script type="module" src="./firebase-init.js"></script>
-    <!-- ☁️ Ativa o modo proxy quando o painel é publicado no Vercel (ver api/) -->
-    <script>window.MIKU_PROXY = true;</script>
     <script src="./app.js"></script>
   </body>
 </html>

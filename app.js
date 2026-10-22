@@ -2,33 +2,21 @@
 
 const $ = (id) => document.getElementById(id);
 
-/* ⚙️ Auto-conexão.
-   Quando o painel é servido PELO PRÓPRIO BOT (python -m bot.main), o servidor
-   injeta `window.MIKU_BOOT` com a URL (mesma origem) e o token do painel.
-   Assim o bot é reconhecido automaticamente — sem digitar URL nem token.
-   Se o painel for aberto sozinho (ex.: Vercel), cai no modo manual antigo. */
+/* 🔐 Sem token: o utilizador entra com Discord. Em cada pedido, o bot confirma
+   se é dono/administrador de um servidor onde a Miku está. */
 const BOOT = window.MIKU_BOOT || null;
-const AUTO = !!(BOOT && BOOT.autoConnect);
-
-/* ☁️ Modo proxy (painel no Vercel).
-   O site reencaminha /api/* para o bot (variável MIKU_BOT_URL), por isso a API
-   está sempre na mesma origem: não é preciso escrever URL nenhum. Só o token. */
-const PROXY = !AUTO && !!window.MIKU_PROXY;
 
 const CONFIG = {
   clientId: (BOOT && BOOT.clientId) || '1551238667492790352', // Application ID do Discord
 };
 
 const estado = {
-  url: AUTO
-    ? (BOOT.apiUrl || window.location.host)
-    : PROXY ? window.location.host : (localStorage.getItem('miku-dash/url') || ''),
-  token: AUTO ? (BOOT.token || '') : (localStorage.getItem('miku-dash/token') || ''),
+  url: window.location.host, // mesma origem: o Vercel reencaminha /api para o bot
+  token: '',                 // token de login Discord (sessionStorage)
   guildId: localStorage.getItem('miku-dash/guild') || '1501482046693052466',
   guilds: [],
   canais: [],
   ligado: false,
-  auto: AUTO,
   timer: null,
   rankTipo: 'xp',
 };
@@ -82,6 +70,7 @@ async function api(caminho, opcoes = {}) {
       ...(opcoes.headers || {}),
     },
   });
+  if (resp.status === 401) sessaoExpirou();
   let dados = {};
   try { dados = await resp.json(); } catch { /* resposta vazia */ }
   if (!resp.ok || dados.ok === false) {
@@ -133,20 +122,33 @@ function loginDiscord() {
     response_type: 'token',
     client_id: CONFIG.clientId,
     redirect_uri: redirectUri(),
-    scope: 'identify',
+    scope: 'identify guilds',
     state,
   });
   window.location.href = `https://discord.com/oauth2/authorize?${params.toString()}`;
 }
 
-function logoutDiscord() {
+function terminarSessao(mensagem = '') {
   guardarSessao('miku-dash/oauth', null);
-  localStorage.setItem('miku-dash/convidado', '1');
   discord.user = null;
   discord.token = null;
+  estado.token = '';
+  estado.ligado = false;
+  clearInterval(estado.timer);
+  mostrarCartoes(false);
+  pill('', 'Desligado');
   renderizarUtilizador();
-  hint('hint-ligacao', '👋 Sair da conta do Discord.');
-  $('login-overlay').hidden = true;
+  $('login-overlay').hidden = false;
+  if (mensagem) hint('hint-login', mensagem, 'erro');
+}
+
+function logoutDiscord() {
+  terminarSessao('👋 Saíste da conta do Discord. Entra outra vez para continuar.');
+}
+
+function sessaoExpirou() {
+  if (!estado.token) return; // já terminada
+  terminarSessao('⚠️ A sessão Discord expirou. Entra outra vez.');
 }
 
 async function tratarRedirect() {
@@ -164,7 +166,6 @@ async function tratarRedirect() {
   }
   const expira = Date.now() + Number(hash.get('expires_in') || 604800) * 1000;
   guardarSessao('miku-dash/oauth', JSON.stringify({ token, expira }));
-  localStorage.removeItem('miku-dash/convidado');
 }
 
 async function carregarUtilizador() {
@@ -181,6 +182,7 @@ async function carregarUtilizador() {
     });
     if (!resp.ok) throw new Error(`Discord API: ${resp.status}`);
     discord.token = guardado.token;
+    estado.token = guardado.token;
     discord.user = await resp.json();
   } catch {
     discord.user = null;
@@ -210,13 +212,9 @@ function renderizarUtilizador() {
 }
 
 function decidirLogin() {
-  // Overlay de login: à primeira visita (ou sem sessão), senão segue.
-  // No modo auto (servido pelo bot) não bloqueia com login — o bot já é reconhecido.
+  // Sem sessão Discord não há acesso: mostra o login.
   if (discord.user) return;
-  if (AUTO) return;
-  if (!localStorage.getItem('miku-dash/convidado')) {
-    $('login-overlay').hidden = false;
-  }
+  $('login-overlay').hidden = false;
 }
 
 async function initDiscord() {
@@ -229,57 +227,35 @@ async function initDiscord() {
 /* ═══ ligação ═══ */
 
 async function ligar() {
-  // No modo manual, lê e guarda o que o utilizador escreveu.
-  // No modo auto (servido pelo bot), usa a config injetada — sem digitar nada.
-  if (!estado.auto) {
-    if (!PROXY) {
-      estado.url = $('input-url').value.trim().replace(/\/$/, '');
-      localStorage.setItem('miku-dash/url', estado.url);
-    }
-    estado.token = $('input-token').value.trim();
-    localStorage.setItem('miku-dash/token', estado.token);
-  }
-
-  if (!estado.url || !estado.token) {
-    hint('hint-ligacao', 'Preenche a URL e o token.', 'erro');
+  if (!discord.user || !estado.token) {
+    hint('hint-ligacao', 'Entra com Discord para continuar.', 'erro');
+    $('login-overlay').hidden = false;
     return;
   }
 
   pill('', 'A ligar…');
   try {
-    await api('/api/status');
+    const dados = await api('/api/status');
     estado.ligado = true;
     pill('online', 'Ligado');
-    hint('hint-ligacao', 'Ligação estabelecida! 🩵', 'ok');
-    if (estado.auto) $('cartao-ligacao').hidden = true;
+    hint('hint-ligacao', `Olá, ${dados.utilizador}! Ligação estabelecida 🩵`, 'ok');
     mostrarCartoes(true);
     await carregarEstado();
     await carregarGuilds();
     await carregarLogs();
     await carregarRanking(estado.rankTipo);
+    clearInterval(estado.timer);
     estado.timer = setInterval(carregarLogs, 15000);
   } catch (erro) {
     estado.ligado = false;
     pill('erro', 'Sem ligação');
-    $('cartao-ligacao').hidden = false; // mostra o cartão para tentar de novo
+    mostrarCartoes(false);
     let msg = erro.message;
-    if (window.location.protocol === 'https:' && erro instanceof TypeError) {
-      msg += ' — o site é HTTPS, por isso a API do bot tem de responder em HTTPS '
-        + '(se o teu bot só tem HTTP, expõe-o com TLS/túnel ou testa primeiro numa página http:// local).';
-    }
-    if (PROXY) {
-      msg += ' — confirma a variável MIKU_BOT_URL no Vercel e que o bot está online no Wispbyte.';
+    if (erro instanceof TypeError) {
+      msg = 'Não consegui falar com o bot. Confirma que está online no Wispbyte e a variável MIKU_BOT_URL no Vercel.';
     }
     hint('hint-ligacao', `Falha: ${msg}`, 'erro');
   }
-}
-
-function desligar() {
-  estado.ligado = false;
-  clearInterval(estado.timer);
-  pill('', 'Desligado');
-  hint('hint-ligacao', 'Desligado do bot.');
-  mostrarCartoes(false);
 }
 
 /* ═══ estado + servidores ═══ */
@@ -600,16 +576,7 @@ async function carregarLogs() {
 
 /* ═══ arranque ═══ */
 
-$('input-url').value = estado.url;
-$('input-token').value = estado.token;
-if (PROXY) {
-  // No Vercel a URL é automática (proxy) — o campo deixa de ser necessário.
-  $('input-url').closest('label').hidden = true;
-  hint('hint-ligacao', 'Escreve o token do painel e clica em Ligar.');
-}
 
-$('btn-ligar').addEventListener('click', ligar);
-$('btn-desligar').addEventListener('click', desligar);
 $('btn-guardar').addEventListener('click', guardarConfig);
 $('btn-testar').addEventListener('click', testarBoasVindas);
 $('btn-enviar').addEventListener('click', enviarMensagem);
@@ -635,10 +602,6 @@ $('lista-contadores').addEventListener('click', (e) => {
 $('btn-discord-login').addEventListener('click', loginDiscord);
 $('btn-login-discord').addEventListener('click', loginDiscord);
 $('btn-discord-logout').addEventListener('click', logoutDiscord);
-$('btn-continuar').addEventListener('click', () => {
-  localStorage.setItem('miku-dash/convidado', '1');
-  $('login-overlay').hidden = true;
-});
 
 $('select-guild').addEventListener('change', (e) => {
   estado.guildId = e.target.value;
@@ -649,9 +612,5 @@ $('select-guild').addEventListener('change', (e) => {
   carregarRanking(estado.rankTipo);
 });
 
-// Sessão do Discord + ligação automática
-initDiscord();
-if (estado.auto) {
-  hint('hint-ligacao', '🔗 Ligação automática ativa — o bot foi reconhecido sozinho.');
-}
-if (estado.url && estado.token) ligar();
+// Sessão do Discord → ligação automática ao bot
+initDiscord().then(() => { if (discord.user) ligar(); });
