@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Miku-Dashboard — controla a Miku 🩵</title>
+    <meta name="description" content="Painel de controlo da Hatsune Miku Bot: estado, boas-vindas, verificação, anúncios, rankings e logs em tempo real." />
+    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topo">
+      <div class="marca">
+        <span class="logo" aria-hidden="true">🩵</span>
+        <div>
+          <h1>Miku-Dashboard</h1>
+          <p class="sub">Controla a Miku a partir do navegador</p>
+        </div>
+      </div>
+      <div class="topo-acoes">
+        <span class="pill" id="pill-status"><span class="dot"></span> Desligado</span>
+        <button class="botao fantasma" id="btn-discord-login">🔗 Entrar com Discord</button>
+        <span class="user-chip" id="user-chip" hidden>
+          <img id="user-avatar" alt="" width="28" height="28" />
+          <span id="user-nome"></span>
+          <button class="botao fantasma pequeno" id="btn-discord-logout" title="Sair">🚪</button>
+        </span>
+        <a class="botao fantasma" href="https://mikuspace.vercel.app/" target="_blank" rel="noopener">🚀 Jogo</a>
+        <a class="botao fantasma" href="https://mikumusic.vercel.app/" target="_blank" rel="noopener">📺 Atividade</a>
+      </div>
+    </header>
+
+    <main>
+      <!-- ═══ HERO (miku2.svg) ═══ -->
+      <section class="heroi" id="heroi">
+        <div class="heroi-texto">
+          <h2 id="heroi-saudacao">Bem-vinda(o) ao painel! 🎤</h2>
+          <p class="dica">
+            Tudo o que a Miku faz no teu servidor, controlado daqui:
+            boas-vindas, verificação, anúncios, lembretes, contadores e rankings.
+          </p>
+          <div class="acoes">
+            <a class="botao principal" href="#cartao-ligacao">🔌 Ligar ao bot</a>
+            <a class="botao fantasma" href="#cartao-anuncio">📢 Fazer um anúncio</a>
+          </div>
+        </div>
+        <img class="heroi-img" src="./miku2.svg" alt="Miku a cantar" onerror="this.style.display='none'" />
+      </section>
+
+      <!-- ═══ LIGAÇÃO ═══ -->
+      <section class="cartao" id="cartao-ligacao">
+        <h2>🔌 Ligação ao bot</h2>
+        <p class="dica">
+          <b>Automático:</b> quando abres o painel servido pelo próprio bot
+          (<code>python -m bot.main</code>), a ligação é feita sozinha a partir das
+          informações do Discord Developer Portal — não precisas de escrever nada aqui.
+          Este cartão só aparece se abrires o painel fora do bot (ex.: Vercel).
+        </p>
+        <div class="grelha-2">
+          <label>
+            URL da API
+            <input type="text" id="input-url" placeholder="http://localhost:8787 (ou o domínio do bot)" />
+          </label>
+          <label>
+            Token do painel
+            <input type="password" id="input-token" placeholder="token do painel do bot" autocomplete="off" />
+          </label>
+        </div>
+        <div class="acoes">
+          <button class="botao principal" id="btn-ligar">Ligar</button>
+          <button class="botao fantasma" id="btn-desligar">Desligar</button>
+          <span class="hint" id="hint-ligacao">Ainda não ligado.</span>
+        </div>
+      </section>
+
+      <!-- ═══ ESTADO ═══ -->
+      <section class="cartao" id="cartao-estado" hidden>
+        <h2>📊 Estado da Miku</h2>
+        <div class="stats" id="stats">
+          <div class="stat"><span class="v" id="st-bot">—</span><span class="l">Bot</span></div>
+          <div class="stat"><span class="v" id="st-servidores">0</span><span class="l">Servidores</span></div>
+          <div class="stat"><span class="v" id="st-membros">0</span><span class="l">Membros</span></div>
+          <div class="stat"><span class="v" id="st-latencia">0ms</span><span class="l">Latência</span></div>
+          <div class="stat"><span class="v" id="st-uptime">0m</span><span class="l">Uptime</span></div>
+          <div class="stat"><span class="v" id="st-cogs">0</span><span class="l">Sistemas</span></div>
+        </div>
+
+        <label class="bloco">
+          Servidor a gerir
+          <select id="select-guild"></select>
+        </label>
+      </section>
+
+      <!-- ═══ BOAS-VINDAS ═══ -->
+      <section class="cartao" id="cartao-boasvindas" hidden>
+        <h2>🎶 Boas-vindas</h2>
+        <div class="grelha-2">
+          <label>
+            Canal de boas-vindas
+            <select id="select-canal" class="canal-select"></select>
+          </label>
+          <label>
+            Cargo automático
+            <input type="text" id="input-cargo" placeholder="Miku Fan (vazio = nenhum)" />
+          </label>
+        </div>
+        <label class="bloco">
+          Mensagem
+          <textarea id="input-mensagem" rows="3" maxlength="500"
+            placeholder="🎶 {membro} entrou no palco! O show vai começar! 🩵"></textarea>
+        </label>
+        <div class="placeholders">
+          Placeholders:
+          <code>{membro}</code> <code>{nome}</code> <code>{servidor}</code> <code>{total}</code>
+        </div>
+        <div class="acoes">
+          <label class="interruptor">
+            <input type="checkbox" id="input-imagem" checked /> 🎨 Cartão ilustrado
+          </label>
+          <button class="botao principal" id="btn-guardar">Guardar</button>
+          <button class="botao fantasma" id="btn-testar">🧪 Testar boas-vindas</button>
+          <span class="hint" id="hint-boasvindas"></span>
+        </div>
+      </section>
+
+      <!-- ═══ VERIFICAÇÃO ═══ -->
+      <section class="cartao" id="cartao-verificacao" hidden>
+        <h2>✅ Verificação de membros</h2>
+        <p class="dica">Quem clica no botão recebe o cargo. O painel continua a funcionar depois de reiniciar o bot.</p>
+        <div class="grelha-2">
+          <label>
+            Cargo da verificação
+            <select id="select-cargo-verif"></select>
+          </label>
+          <label>
+            Canal do painel
+            <select id="select-canal-verif" class="canal-select"></select>
+          </label>
+        </div>
+        <div class="acoes">
+          <button class="botao principal" id="btn-guardar-verif">Guardar cargo</button>
+          <button class="botao fantasma" id="btn-publicar-verif">📢 Publicar painel</button>
+          <span class="hint" id="hint-verif"></span>
+        </div>
+      </section>
+
+      <!-- ═══ CONTADORES ═══ -->
+      <section class="cartao" id="cartao-contadores" hidden>
+        <h2>📊 Contadores ao vivo</h2>
+        <p class="dica">
+          Canais de voz que se renomeiam sozinhos.
+          Placeholders: <code>{total}</code> <code>{online}</code> <code>{humanos}</code> <code>{bots}</code> <code>{cargos}</code>
+        </p>
+        <div class="grelha-2">
+          <label class="auto">
+            Texto do contador
+            <input type="text" id="input-modelo" maxlength="90" placeholder="👥 Membros: {total}" />
+          </label>
+        </div>
+        <div class="acoes">
+          <button class="botao principal" id="btn-contador-criar">➕ Criar contador</button>
+          <span class="hint" id="hint-contadores"></span>
+        </div>
+        <ul class="lista-simples" id="lista-contadores"><li>Ainda sem contadores.</li></ul>
+      </section>
+
+      <!-- ═══ ANÚNCIO EM EMBED ═══ -->
+      <section class="cartao" id="cartao-anuncio" hidden>
+        <h2>📢 Anúncio com embed</h2>
+        <div class="grelha-2">
+          <label>
+            Canal
+            <select id="select-canal-embed" class="canal-select"></select>
+          </label>
+          <label>
+            Cor do embed
+            <input type="color" id="input-cor" value="#39c5bb" class="input-cor" />
+          </label>
+          <label class="auto">
+            Título
+            <input type="text" id="input-titulo" maxlength="256" placeholder="🎉 Grande novidade!" />
+          </label>
+          <label class="auto">
+            Descrição
+            <textarea id="input-descricao" rows="3" maxlength="2000" placeholder="Escreve aqui o teu anúncio…"></textarea>
+          </label>
+          <label class="auto">
+            Rodapé (opcional)
+            <input type="text" id="input-rodape" maxlength="200" placeholder="Hatsune Miku Bot 🎤" />
+          </label>
+        </div>
+        <div class="acoes">
+          <button class="botao principal" id="btn-enviar-embed">📢 Enviar anúncio</button>
+          <span class="hint" id="hint-embed"></span>
+        </div>
+      </section>
+
+      <!-- ═══ LEMBRETES ═══ -->
+      <section class="cartao" id="cartao-lembrete" hidden>
+        <h2>⏰ Lembretes agendados</h2>
+        <div class="grelha-2">
+          <label>
+            Canal
+            <select id="select-canal-lembrete" class="canal-select"></select>
+          </label>
+          <label>
+            Daqui a… (minutos)
+            <input type="number" id="input-minutos" min="1" max="1440" value="30" />
+          </label>
+          <label class="auto">
+            Lembrete
+            <input type="text" id="input-lembrete" maxlength="500" placeholder="Hora do evento! 🎤" />
+          </label>
+        </div>
+        <div class="acoes">
+          <button class="botao principal" id="btn-lembrete">⏰ Agendar lembrete</button>
+          <span class="hint" id="hint-lembrete"></span>
+        </div>
+      </section>
+
+      <!-- ═══ MODERAÇÃO RÁPIDA ═══ -->
+      <section class="cartao" id="cartao-moderacao" hidden>
+        <h2>🧹 Moderação rápida</h2>
+        <div class="grelha-2">
+          <label>
+            Canal
+            <select id="select-canal-mod" class="canal-select"></select>
+          </label>
+          <label>
+            Mensagens para apagar (1–100)
+            <input type="number" id="input-quantidade" min="1" max="100" value="10" />
+          </label>
+        </div>
+        <div class="acoes">
+          <button class="botao perigo" id="btn-limpar">🧹 Limpar mensagens</button>
+          <span class="hint" id="hint-mod"></span>
+        </div>
+      </section>
+
+      <!-- ═══ RANKINGS ═══ -->
+      <section class="cartao" id="cartao-rankings" hidden>
+        <div class="cartao-topo">
+          <h2>🏆 Rankings do servidor</h2>
+          <div class="acoes">
+            <button class="botao fantasma pequeno" data-rank="xp">📈 XP</button>
+            <button class="botao fantasma pequeno" data-rank="economia">💰 Economia</button>
+            <button class="botao fantasma pequeno" id="btn-rank-refresh">🔄</button>
+          </div>
+        </div>
+        <ol class="lista-simples ranking" id="lista-ranking"><li>Ainda sem dados.</li></ol>
+      </section>
+
+      <!-- ═══ FALAR COMO MIKU ═══ -->
+      <section class="cartao" id="cartao-say" hidden>
+        <h2>💬 Falar como a Miku</h2>
+        <div class="grelha-2">
+          <label>
+            Canal
+            <select id="select-canal-say" class="canal-select"></select>
+          </label>
+          <label class="auto">
+            Mensagem
+            <textarea id="input-say" rows="2" maxlength="2000" placeholder="Olá pessoal! 🩵"></textarea>
+          </label>
+        </div>
+        <div class="acoes">
+          <button class="botao principal" id="btn-enviar">Enviar mensagem</button>
+          <span class="hint" id="hint-say"></span>
+        </div>
+      </section>
+
+      <!-- ═══ LOGS ═══ -->
+      <section class="cartao" id="cartao-logs" hidden>
+        <div class="cartao-topo">
+          <h2>📋 Registos do painel</h2>
+          <button class="botao fantasma pequeno" id="btn-logs">Atualizar</button>
+        </div>
+        <ul class="logs" id="lista-logs"><li>Ainda sem registos.</li></ul>
+      </section>
+    </main>
+
+    <footer>
+      🩵 Hatsune Miku Bot ·
+      <a href="https://mikuspace.vercel.app/" target="_blank" rel="noopener">Órbita Rush</a> ·
+      <a href="https://mikumusic.vercel.app/" target="_blank" rel="noopener">Atividade</a>
+    </footer>
+
+    <!-- ═══ LOGIN COM DISCORD ═══ -->
+    <div class="login-overlay" id="login-overlay" hidden>
+      <div class="login-cartao">          <img class="login-img" src="./miku.svg" alt="Miku a acenar" onerror="this.style.display='none'" />
+        <div class="login-texto">
+          <h2>Entrar com Discord 🔗</h2>
+          <p class="dica">
+            Mostra quem és no painel e personaliza a experiência.
+            O controlo do bot continua protegido pelo token da API.
+          </p>
+          <div class="acoes">
+            <button class="botao principal" id="btn-login-discord">🔗 Entrar com Discord</button>
+            <button class="botao fantasma" id="btn-continuar">Continuar sem entrar</button>
+          </div>
+          <p class="hint" id="hint-login">
+            Precisas de registar esta página em
+            <code>Discord Developer Portal → OAuth2 → Redirects</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🔥 Firebase Analytics (módulo ES — não bloqueia o painel) -->
+    <script type="module" src="./firebase-init.js"></script>
+    <!-- ☁️ Ativa o modo proxy quando o painel é publicado no Vercel (ver api/) -->
+    <script>window.MIKU_PROXY = true;</script>
+    <script src="./app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" width="240" height="320" role="img" aria-label="Miku a acenar">
+  <defs>
+    <linearGradient id="cabelo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7af7e4"/>
+      <stop offset="1" stop-color="#2ba99a"/>
+    </linearGradient>
+    <linearGradient id="brilho" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#57e6ff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#57e6ff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- halo -->
+  <circle cx="120" cy="150" r="112" fill="url(#brilho)"/>
+
+  <!-- rabos de cavalo -->
+  <path d="M78 96 C40 130 34 208 52 268 C56 280 68 278 66 266 C58 214 66 152 92 120 Z" fill="url(#cabelo)"/>
+  <path d="M162 96 C200 130 206 208 188 268 C184 280 172 278 174 266 C182 214 174 152 148 120 Z" fill="url(#cabelo)"/>
+
+  <!-- corpo -->
+  <path d="M120 168 C92 168 74 192 70 232 L64 320 L176 320 L170 232 C166 192 148 168 120 168 Z" fill="#20344a"/>
+  <path d="M120 172 L106 206 L120 224 L134 206 Z" fill="#4af0c0"/>
+  <rect x="116" y="226" width="8" height="60" fill="#57e6ff" opacity=".85"/>
+  <path d="M70 236 L46 300 L64 306 L84 252 Z" fill="#20344a"/>
+  <path d="M170 236 L194 300 L176 306 L156 252 Z" fill="#20344a"/>
+  <!-- mão a acenar -->
+  <circle cx="200" cy="296" r="12" fill="#ffe3cd"/>
+  <path d="M196 286 L194 274 M202 285 L204 273 M208 287 L213 277" stroke="#ffe3cd" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- cabelo frontal -->
+  <path d="M120 54 C86 54 66 80 68 116 C70 138 82 152 96 156 L100 128 C108 118 132 118 140 128 L144 156 C158 152 170 138 172 116 C174 80 154 54 120 54 Z" fill="url(#cabelo)"/>
+  <path d="M104 60 L118 84 L92 76 Z M136 60 L122 84 L148 76 Z" fill="#2ba99a"/>
+
+  <!-- cara -->
+  <ellipse cx="120" cy="118" rx="40" ry="38" fill="#ffe3cd"/>
+  <ellipse cx="104" cy="120" rx="7" ry="10" fill="#1c7f77"/>
+  <ellipse cx="136" cy="120" rx="7" ry="10" fill="#1c7f77"/>
+  <circle cx="106" cy="116" r="2.5" fill="#fff"/>
+  <circle cx="138" cy="116" r="2.5" fill="#fff"/>
+  <path d="M112 138 Q120 145 128 138" stroke="#c9766b" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="90" cy="132" rx="7" ry="4" fill="#ffb3a1" opacity=".7"/>
+  <ellipse cx="150" cy="132" rx="7" ry="4" fill="#ffb3a1" opacity=".7"/>
+
+  <!-- headset -->
+  <path d="M74 112 A46 46 0 0 1 166 112" stroke="#2b3f57" stroke-width="10" fill="none" stroke-linecap="round"/>
+  <rect x="62" y="104" width="20" height="34" rx="9" fill="#2b3f57"/>
+  <rect x="158" y="104" width="20" height="34" rx="9" fill="#2b3f57"/>
+  <rect x="66" y="110" width="12" height="22" rx="6" fill="#57e6ff"/>
+  <rect x="162" y="110" width="12" height="22" rx="6" fill="#57e6ff"/>
+  <path d="M74 138 Q70 158 84 164" stroke="#2b3f57" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="86" cy="165" r="5" fill="#4af0c0"/>
+
+  <!-- notas musicais -->
+  <g fill="#57e6ff">
+    <circle cx="34" cy="70" r="7"/><rect x="39" y="38" width="4" height="32" rx="2"/>
+    <path d="M39 38 q14 4 14 16 l-5 1 q0 -10 -9 -13 Z"/>
+    <circle cx="210" cy="52" r="6" fill="#ffc94d"/><rect x="214" y="24" width="4" height="28" rx="2" fill="#ffc94d"/>
+    <circle cx="216" cy="140" r="5" fill="#ff8ad8"/><rect x="219" y="118" width="3.5" height="22" rx="2" fill="#ff8ad8"/>
+  </g>
+
+  <!-- estrelas -->
+  <path d="M52 40 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z" fill="#ffc94d"/>
+  <path d="M196 236 l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5 Z" fill="#57e6ff"/>
+</svg>
